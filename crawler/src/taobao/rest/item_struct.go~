@@ -1,0 +1,72 @@
+package rest
+
+type Location struct {
+	City  string `json:"city"`
+	State string `json:"state"`
+}
+
+type ItemImg struct {
+	Id       int    `json:"id"`
+	Url      string `json:"url"`
+	Position int    `json:"position"`
+	Created  string `json:"created"`
+}
+
+type ItemImgs struct {
+	ItemImgArray []*ItemImg `json:"item_img" bson:"item_img"`
+}
+
+type Sku struct {
+	PropertiesName string  `json:"properties_name" bson:"properties_name"`
+	Properties     string  `json:"properties" bson:"properties"`
+	SkuId          int     `json:"sku_id" bson:"sku_id"`
+	Quantity       int     `json:"quantity"`
+	Price          float32 `json:"price,string"`
+	Created        string  `json:"created"`
+	Modified       string  `json:"modified"`
+}
+
+type Skus struct {
+	SkuArray []*Sku `json:"sku"`
+}
+
+type PropImg struct {
+	Id         int    `json:"id"`
+	Url        string `json:"url"`
+	Properties string `json:"properties"`
+	Created    string `json:"created"`
+}
+
+type PropImgs struct {
+	PropImgArray []*PropImg `json:"prop_img" bson:"prop_img"`
+}
+
+type Item struct {
+	DetailUrl       string    `json:"detail_url" bson:"detail_url"`
+	NumIid          int       `json:"num_iid"`
+	Title           string    `json:"title"`
+	Nick            string    `json:"nick"`
+	Type            string    `json:"type"`
+	Desc            string    `json:"desc"`
+	Cid             int       `json:"cid"`
+	PicUrl          string    `json:"pic_url" bson:"pic_url"`
+	Num             int       `json:"num"`
+	ListTime        string    `json:"list_time" bson:"list_time"`
+	DelistTime      string    `json:"delist_time" bson:"delist_time"`
+	StuffStatus     string    `json:"stuff_status" bson:"stuff_status"`
+	Location        *Location `json:"location"`
+	Price           float32   `json:"price,string"`
+	GlobalStockType string    `json:"global_stock_type" bson:"global_stock_type"` //1现货, 2代购
+	ItemImgs        *ItemImgs `json:"item_imgs" bson:"item_imgs"`
+	Skus            *Skus     `json:"skus"`
+	PropsName       string    `json:"props_name" bson:"props_name"`
+	PropImgs        *PropImgs `json:"prop_imgs" bson:"prop_imgs"`
+}
+
+type ItemGetResponse struct {
+	Item *Item `json:"item"`
+}
+
+type ItemGetResponseResult struct {
+	Response *ItemGetResponse `json:"item_get_response"`
+}
