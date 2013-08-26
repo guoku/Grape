@@ -16,11 +16,11 @@ func (t *ShopGetRequest) SetNick(value string) {
 	t.SetValue("nick", value)
 }
 
-func (t *ShopGetRequest) GetResponse() (*ShopGetResponse, []byte, error) {
+func (t *ShopGetRequest) GetResponse() (*ShopGetResponse, error, *taobao.TopError) {
 	var resp ShopGetResponseResult
-	data, err := t.TaobaoRequest.GetResponse("taobao.shop.get", &resp, "")
-	if err != nil {
-		return nil, data, err
+	_, progErr, topErr := t.TaobaoRequest.GetResponse("taobao.shop.get", &resp, "")
+	if progErr != nil {
+		return nil, progErr, topErr
 	}
-	return resp.Response, data, err
+	return resp.Response, progErr, topErr
 }

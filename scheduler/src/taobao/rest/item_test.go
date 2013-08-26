@@ -3,6 +3,7 @@ package rest
 import (
 	"fmt"
 	"testing"
+
 )
 
 func TestItemGetRequest(t *testing.T) {
@@ -17,4 +18,11 @@ func TestItemGetRequest(t *testing.T) {
 	fmt.Println(resp.Item.Title)
 	fmt.Println(resp.Item.Price)
 	fmt.Println(resp.Item.ItemImgs.ItemImgArray)
+	r.SetNumIid(1950341)
+	resp, _, err = r.GetResponse()
+    if err != nil {
+        fmt.Println(err.SubCode)
+    }
+
+    fmt.Println(err.Error())
 }

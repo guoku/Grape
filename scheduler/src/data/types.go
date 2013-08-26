@@ -26,6 +26,6 @@ type TaobaoItem struct {
 	ApiDataUpdatedTime     time.Time    `bson:"api_data_updated_time"`
 	ApiData                rest.Item    `bson:"api_data"`
 	CrawlerData            CrawlerData  `bson:"crawler_data"`
-	CreatedTime             time.Time    `bson:"created_time"`
+	CreatedTime            time.Time    `bson:"created_time"`
 }
 

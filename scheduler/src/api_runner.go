@@ -1,6 +1,9 @@
 package main
 
 import (
+    "fmt"
+    "time"
+
     "data"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
@@ -17,8 +20,21 @@ func init() {
     MgoSession = session
 }
 
-func getApiData(numIid int) {
-   
+func getApiData(c *mgo.Collection, numIid int) {
+    itemInfo, topErr := client.GetTaobaoItemInfo(numIid)
+    if topErr != nil {
+        fmt.Println(topErr.Error())
+        if topErr.SubCode == "isv.item-get-service-error:ITEM_NOT_FOUND" || topErr.SubCode == "isv.item-is-delete:invalid-numIid" {
+           c.RemoveAll(bson.M{"num_iid" : numIid}) 
+        }
+        return
+    }
+    if itemInfo == nil {
+        return
+    }
+    fmt.Println(numIid, itemInfo.Title)
+    change := bson.M{"$set" : bson.M{"api_data" : *itemInfo, "api_data_ready" : true, "api_data_updated_time" : time.Now()}}
+    c.Update(bson.M{"num_iid" : numIid, "api_data_ready" : false}, change)
 }
 
 func scanTaobaoItems() {
@@ -29,10 +45,14 @@ func scanTaobaoItems() {
         panic(err)
     }
     for _, record := range results {
-        getApiData(record.NumIid)
+        fmt.Println(record.Sid, record.NumIid)
+        getApiData(c, record.NumIid)
     }
 }
 
 func main() {
-    scanTaobaoItems()
+    for {
+        scanTaobaoItems()
+        time.Sleep(5 * time.Minute)
+    }
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -66,14 +65,15 @@ func addHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(r.Form["shop_name"])
 		c := MgoSession.DB("test").C("taobao_shops_depot")
 		shopName := r.Form["shop_name"][0]
-		shopInfo := client.GetTaobaoShopInfo(shopName)
-		if shopInfo == nil {
-			http.Redirect(w, r, "/home", http.StatusFound)
+		shopInfo, topErr := client.GetTaobaoShopInfo(shopName)
+		if topErr != nil {
+            http.Redirect(w, r, "/home", http.StatusFound)
 			return
 		}
 		result := data.ShopItem{}
-		c.Find(bson.M{"shopinfo.sid": shopInfo.Sid}).One(&result)
-		if result.ShopInfo.Nick != "" {
+		c.Find(bson.M{"shop_info.sid": shopInfo.Sid}).One(&result)
+		fmt.Println("add shop", result.ShopInfo.Nick)
+        if result.ShopInfo.Nick != "" {
 			http.Redirect(w, r, "/home", http.StatusFound)
 			return
 		}
@@ -98,7 +98,7 @@ func getShopHandler(w http.ResponseWriter, r *http.Request) {
             io.WriteString(w, "0")
         } else {
 		    change := bson.M{"$set": bson.M{"status": "crawling", "last_crawled_time" : time.Now()}}
-		    c.Update(bson.M{"shop_info.sid": result.ShopInfo.Sid}, change)
+		    c.Update(bson.M{"shop_info.sid": result.ShopInfo.Sid, "status" : "queued"}, change)
             fmt.Println(result.ShopInfo.Nick)
 		    shopResult := getShopResult{result.ShopInfo.Nick, result.ShopInfo.Sid, result.ShopInfo.Title}
             data, _ := json.Marshal(shopResult)
@@ -110,22 +110,19 @@ func getShopHandler(w http.ResponseWriter, r *http.Request) {
 func sendShopItemIdsHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.FormValue("sid"))
 	r.ParseForm()
-	fmt.Println(r.PostForm)
-	body, _ := ioutil.ReadAll(r.Body)
-	fmt.Println(string(body))
-	fmt.Println(r.Form)
-	fmt.Println(r.Form["sid"], r.Form["item_ids"])
 	sid, _ := strconv.Atoi(r.Form["sid"][0])
 	itemsString := r.Form["item_ids"][0]
 	itemIDs := strings.Split(itemsString, ",")
-	fmt.Println(sid, itemsString, itemIDs)
 	c := MgoSession.DB("test").C("raw_taobao_items_depot")
 	for _, v := range itemIDs {
 		taobaoItem := data.TaobaoItem{}
-		numIid, _ := strconv.Atoi(v)
-		fmt.Println(v, numIid)
+		numIid, err := strconv.Atoi(v)
+        if err != nil {
+            continue
+        }
 		c.Find(bson.M{"num_iid": numIid}).One(&taobaoItem)
 		if taobaoItem.NumIid == 0 {
+            fmt.Println(numIid, v)
 			taobaoItem.Sid = sid
 			taobaoItem.NumIid = numIid
             taobaoItem.CreatedTime = time.Now()

@@ -74,7 +74,7 @@ func (t *TaobaoRequest) DelValue(key string) {
 	t.values.Del(key)
 }
 
-func (t *TaobaoRequest) GetResponse(methodName string, resp interface{}, session string) ([]byte, error) {
+func (t *TaobaoRequest) GetResponse(methodName string, resp interface{}, session string) ([]byte, error, *TopError) {
 	t.SetReqUrl("http://gw.api.taobao.com/router/rest")
 	t.SetValue("format", "json")
 	t.SetValue("v", "2.0")
@@ -87,21 +87,23 @@ func (t *TaobaoRequest) GetResponse(methodName string, resp interface{}, session
 	if session != "" {
 		t.SetValue("session", session)
 	}
+    var topErr *TopError
 	fmt.Println(t.GetValues().Encode())
-	response, err := http.PostForm(t.GetReqUrl(), t.GetValues())
-	fmt.Println(err)
-	data, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return data, err
+	response, progErr := http.PostForm(t.GetReqUrl(), t.GetValues())
+	fmt.Println(progErr)
+	data, progErr := ioutil.ReadAll(response.Body)
+	if progErr != nil {
+		return data, progErr, topErr
 	}
 	var errResp TaobaoErrResponse
-	err = json.Unmarshal(data, &errResp)
-	if err != nil {
-		return data, err
+	progErr = json.Unmarshal(data, &errResp)
+	if progErr != nil {
+		return data, progErr, topErr
 	}
-	errstr := errResp.GetErr()
-	if errstr != "" {
-		return data, errors.New(errstr)
+	topErr = errResp.ErrResponse
+	if topErr != nil {
+        fmt.Println(topErr.Error())
+		return data, progErr, topErr
 	}
-	return data, json.Unmarshal(data, resp)
+	return data, json.Unmarshal(data, resp), topErr
 }
