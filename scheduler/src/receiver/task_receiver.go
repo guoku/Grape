@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/json"
+    "errors"
 	"fmt"
+    "flag"
 	"html/template"
 	"io"
 	"log"
@@ -12,9 +14,11 @@ import (
 	"time"
 
     "data"
+	"taobao/client"
+
+    "github.com/pelletier/go-toml"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
-	"taobao/client"
 )
 
 type getShopResult struct {
@@ -24,13 +28,31 @@ type getShopResult struct {
 }
 
 var MgoSession *mgo.Session
-
+var dbName string
 func init() {
-	session, err := mgo.Dial("localhost")
+    var env string
+    flag.StringVar(&env, "env", "prod", "program environment")
+    flag.Parse()
+    var mongoSetting *toml.TomlTree
+    conf, err := toml.LoadFile("config/config.toml")
+    switch env {
+        case "debug":
+            mongoSetting = conf.Get("mongodb.debug").(*toml.TomlTree)
+        case "staging":
+            mongoSetting = conf.Get("mongodb.staging").(*toml.TomlTree)
+        case "prod":
+            mongoSetting = conf.Get("mongodb.prod").(*toml.TomlTree)
+        default:
+            panic(errors.New("Wrong Environment Flag Value. Should be 'debug', 'staging' or 'prod'"))
+    }
+    fmt.Println(mongoSetting.Get("host").(string), mongoSetting.Get("db").(string))
+
+	session, err := mgo.Dial(mongoSetting.Get("host").(string))
 	if err != nil {
 		panic(err)
 	}
 	MgoSession = session
+    dbName = mongoSetting.Get("db").(string)
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
@@ -40,7 +62,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		c := MgoSession.DB("test").C("taobao_shops_depot")
+		c := MgoSession.DB(dbName).C("taobao_shops_depot")
 		results := make([]data.ShopItem, 0)
 		err = c.Find(bson.M{}).All(&results)
 		if err != nil {
@@ -63,7 +85,7 @@ func addHandler(w http.ResponseWriter, r *http.Request) {
 	} else if r.Method == "POST" {
 		r.ParseForm()
 		fmt.Println(r.Form["shop_name"])
-		c := MgoSession.DB("test").C("taobao_shops_depot")
+		c := MgoSession.DB(dbName).C("taobao_shops_depot")
 		shopName := r.Form["shop_name"][0]
 		shopInfo, topErr := client.GetTaobaoShopInfo(shopName)
 		if topErr != nil {
@@ -91,7 +113,7 @@ func addHandler(w http.ResponseWriter, r *http.Request) {
 
 func getShopHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		c := MgoSession.DB("test").C("taobao_shops_depot")
+		c := MgoSession.DB(dbName).C("taobao_shops_depot")
 		result := data.ShopItem{}
 		c.Find(bson.M{"status": "queued"}).One(&result)
         if result.ShopInfo.Nick == "" {
@@ -113,7 +135,7 @@ func sendShopItemIdsHandler(w http.ResponseWriter, r *http.Request) {
 	sid, _ := strconv.Atoi(r.Form["sid"][0])
 	itemsString := r.Form["item_ids"][0]
 	itemIDs := strings.Split(itemsString, ",")
-	c := MgoSession.DB("test").C("raw_taobao_items_depot")
+	c := MgoSession.DB(dbName).C("raw_taobao_items_depot")
 	for _, v := range itemIDs {
 		taobaoItem := data.TaobaoItem{}
 		numIid, err := strconv.Atoi(v)
