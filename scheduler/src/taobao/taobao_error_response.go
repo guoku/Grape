@@ -4,25 +4,18 @@ import (
 	"strconv"
 )
 
-type ErrResponse struct {
+type TopError struct {
 	Code int    `json:"code"`
 	Msg  string `json:"msg"`
+    SubCode string `json:"sub_code"`
+    SubMsg string `json:"sub_msg"`
+}
+
+func (e TopError) Error() string {
+    return "Code: " + strconv.Itoa(e.Code) + ", Msg: " + e.Msg + ", SubCode: " + e.SubCode + ", SubMsg: " + e.SubMsg
 }
 
 type TaobaoErrResponse struct {
-	Error            string       `json:"error"`
-	ErrorDescription string       `json:"error_description"`
-	ErrResponse      *ErrResponse `json:"error_response"`
+	ErrResponse      *TopError `json:"error_response"`
 }
 
-func (t *TaobaoErrResponse) GetErr() string {
-	if t.Error != "" {
-		return "[" + t.Error + "]" + t.ErrorDescription
-	}
-	if t.ErrResponse != nil {
-		if t.ErrResponse.Code > 0 {
-			return "[" + strconv.Itoa(t.ErrResponse.Code) + "]" + t.ErrResponse.Msg
-		}
-	}
-	return ""
-}

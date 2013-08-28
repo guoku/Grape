@@ -17,11 +17,11 @@ func (t *ItemGetRequest) SetNumIid(value int) {
 	t.SetValue("num_iid", strconv.Itoa(value))
 }
 
-func (t *ItemGetRequest) GetResponse() (*ItemGetResponse, []byte, error) {
+func (t *ItemGetRequest) GetResponse() (*ItemGetResponse, error, *taobao.TopError) {
 	var resp ItemGetResponseResult
-	data, err := t.TaobaoRequest.GetResponse("taobao.item.get", &resp, "")
-	if err != nil {
-		return nil, data, err
+	_, progErr, topErr := t.TaobaoRequest.GetResponse("taobao.item.get", &resp, "")
+	if progErr != nil {
+		return nil, progErr, topErr
 	}
-	return resp.Response, data, err
+	return resp.Response, progErr, topErr
 }
