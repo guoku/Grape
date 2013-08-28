@@ -14,8 +14,6 @@ var Drone = function(options, callback){
     _drone.work = function(){
         var parser = this.get_parser();
         if(!parser){
-//            var hatchery = new Hatchery();
-//            hatchery.kill_drone(this);
             return false;
         }
         Gather.get(parser, this.options, callback);

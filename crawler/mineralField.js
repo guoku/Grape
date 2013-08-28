@@ -26,6 +26,9 @@ var MineralField = function(options){
     _mf.update = function(data){
         this.items_num = parseInt(data.items_num);
         this.items_list = this.items_list.concat(data.id_list);
+        if(data.id_list.length == 0){
+            return false;
+        }
         console.log(this.items_num + " || " + this.items_list.length);
         if(this.items_num < 0){
             this.state = 'error';
@@ -53,8 +56,6 @@ var MineralField = function(options){
         }];
         Storage.write('minerals', data);
     }
-
-
 
     return _mf;
 };

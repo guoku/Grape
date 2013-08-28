@@ -36,6 +36,7 @@ var _hatchery = {
 
                     var drone = hatchery.create_drone(mf_location, function(data){
                         mf.update(data);
+                        hatchery.kill_drone(drone);
                         gather_one_page(mf);
                     });
                     drone.work();
