@@ -42,10 +42,20 @@ var Storage = {
             if(err)
                 console.log(err);
         });
+    },
+    update   : function(collection_name, data){
+        if(!this.db){
+            this.init();
+        }
+
+        var collection = this.db.collection(collection_name);
+        collection.update({_id:data._id}, {$set: {state:'posted'}});
     }
 };
 
-//Storage.readOne('minerals', {shop_id:"1580297"}, function(v){console.log(v)});
+//Storage.readOne('minerals', {shop_id:58011951}, function(data){
+//    Storage.update('minerals', data[0]);
+//});
 //Storage.read('minerals', {shop_id:"1580297"}, function(v){console.log(v)});
 
 module.exports = Storage;
