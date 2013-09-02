@@ -29,6 +29,7 @@ type getShopResult struct {
 
 var MgoSession *mgo.Session
 var dbName string
+var shopLock chan int = make(chan int)
 func init() {
     var env string
     flag.StringVar(&env, "env", "prod", "program environment")
@@ -93,21 +94,32 @@ func addHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		result := data.ShopItem{}
-		c.Find(bson.M{"shop_info.sid": shopInfo.Sid}).One(&result)
-		fmt.Println("add shop", result.ShopInfo.Nick)
-        if result.ShopInfo.Nick != "" {
-			http.Redirect(w, r, "/home", http.StatusFound)
-			return
-		}
-		result.ShopInfo = *shopInfo
-        result.CreatedTime = time.Now()
-        result.LastUpdatedTime = time.Now()
-		result.Status = "queued"
-		err := c.Insert(&result)
-		if err != nil {
-			panic(err)
-		}
-		http.Redirect(w, r, "/home", http.StatusFound)
+        fmt.Println("lock")
+		
+        go func() {
+            c.Find(bson.M{"shop_info.sid": shopInfo.Sid}).One(&result)
+		    fmt.Println("add shop", result.ShopInfo.Nick)
+            if result.ShopInfo.Nick != "" {
+                shopLock <- 0 // Unlock
+			    return
+		    }
+		    result.ShopInfo = *shopInfo
+            result.CreatedTime = time.Now()
+            result.LastUpdatedTime = time.Now()
+		    result.Status = "queued"
+		    err := c.Insert(&result)
+		    if err != nil {
+			    panic(err)
+		    }
+            shopLock <- 1 // Unlock
+        } ()
+        resultCode := <-shopLock  // Lock before insert shop item
+		if resultCode == 0 {
+            // Todo: show info in client
+            http.Redirect(w, r, "/home", http.StatusFound)
+        } else {
+		    http.Redirect(w, r, "/home", http.StatusFound)
+        }
 	}
 }
 
@@ -142,6 +154,7 @@ func sendShopItemIdsHandler(w http.ResponseWriter, r *http.Request) {
         if err != nil {
             continue
         }
+
 		c.Find(bson.M{"num_iid": numIid}).One(&taobaoItem)
 		if taobaoItem.NumIid == 0 {
             fmt.Println(numIid, v)
@@ -162,7 +175,7 @@ func main() {
 	http.HandleFunc("/add", addHandler)
 	http.HandleFunc("/get_shop", getShopHandler)
 	http.HandleFunc("/send_items", sendShopItemIdsHandler)
-	err := http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":10080", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err.Error())
 	}
