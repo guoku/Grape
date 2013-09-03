@@ -30,8 +30,21 @@ var MineralField = function(options){
             return false;
         }
         console.log(this.items_num + " || " + this.items_list.length);
-        if(this.items_num < 0){
-            this.state = 'error';
+        if(!this.items_num || this.items_num < 0){
+            if(data.has_more){
+                this.items_num = this.items_list.length + 1;
+                this.state = 'occupied';
+                this.page++;
+            }
+            else{
+                if (this.items_list.length > 0) {
+                    this.items_num = this.items_list.length;
+                    this.state = 'gathered';
+                    this.store();
+                }
+                else
+                    this.state = 'error';
+            }
         }
         else{
             if(this.items_list.length < this.items_num){

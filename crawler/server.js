@@ -9,10 +9,15 @@ app.listen(8080);
 
 app.get("/new/shop", function(req, res){
     var id = req.param("id");
-    var hatchery = new Hatchery(); 
-    hatchery.tasks.shop.push(id);
-    console.log(hatchery.tasks.shop);
-    res.send("recived");
+    if (id)  { 
+        var hatchery = new Hatchery(); 
+        hatchery.tasks.shop.push(id);
+        console.log(hatchery.tasks.shop);
+        res.send("recived");
+    }
+    else {
+        res.send("wrong id");
+    }
 });
 
 app.get("/query/shop", function(req, res){
@@ -43,7 +48,7 @@ var get_task = function(){
     });
 
 };
-setInterval(get_task, 1000 * 10);
+//setInterval(get_task, 1000 * 10);
 
 
 var post_item = function(){
@@ -72,4 +77,4 @@ var post_item = function(){
     });
 
 };
-setInterval(post_item, 1000 * 120);
+//setInterval(post_item, 1000 * 120);

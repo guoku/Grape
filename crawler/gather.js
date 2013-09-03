@@ -2,6 +2,7 @@ var Config = require("./Config")
 var Http = require("http");
 var Url = require("url");
 var $ = require("jQuery");
+var Iconv = require("iconv").Iconv;
 
 var Gather = {
     get : function(parse_f, options, callback){
@@ -37,14 +38,20 @@ var Gather = {
 //                req.abort();
 //                console.error(err);
 //            }, 5000);
-
-            res.setEncoding('utf8');
+            if (options['hostname'].indexOf("taobao") == -1 && options['hostname'].indexOf("tmall") == -1){
+                res.setEncoding('utf8');
+            }
             var buffers = [];
             res.on('data', function (chunk) {
                 var b = new Buffer(chunk);
                 buffers.push(b);
             }).on('end', function(){
-                var html = Buffer.concat(buffers).toString();
+                if (options['hostname'].indexOf("taobao") != -1 || options['hostname'].indexOf("tmall") != -1){
+                    var iconv = new Iconv('GBK', 'UTF-8');
+                    var html = iconv.convert(Buffer.concat(buffers)).toString();
+                }
+                else
+                    var html = Buffer.concat(buffers).toString();
                 parse_f(html, callback);
             }).on('error', function(err) {
 //                clearTimeout(response_timeout);
