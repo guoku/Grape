@@ -1,6 +1,6 @@
 #!/bin/bash
-sudo apt-get install nodejs
-sudo apt-get install mongodb
+#sudo apt-get install nodejs
+#sudo apt-get install mongodb
 
 npm install jsdom
 npm install xmlhttprequest

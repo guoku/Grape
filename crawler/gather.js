@@ -1,4 +1,4 @@
-var Config = require("./Config")
+var Config = require("./config")
 var Http = require("http");
 var Url = require("url");
 var $ = require("jQuery");

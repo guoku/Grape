@@ -1,6 +1,6 @@
-var Gather = require("./Gather");
-var Parser = require("./Parser");
-var Hatchery = require("./Hatchery");
+var Gather = require("./gather");
+var Parser = require("./parser");
+var Hatchery = require("./hatchery");
 
 var Drone = function(options, callback){
     var _drone = {};

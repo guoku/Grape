@@ -20,7 +20,7 @@ var Parser = {
         }
         else 
             var has_more = false;
-        console.log(has_more);
+        console.log("shop has more items: " + has_more);
 
         callback({
             items_num : items_num,

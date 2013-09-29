@@ -1,6 +1,6 @@
 var $ = require("jQuery");
-var Hatchery = require("./Hatchery");
-var Storage = require("./Storage");
+var Hatchery = require("./hatchery");
+var Storage = require("./storage");
 
 var MineralField = function(options){
     var _mf = $.extend({

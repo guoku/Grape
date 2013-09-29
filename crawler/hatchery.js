@@ -1,5 +1,5 @@
-var Drone = require("./Drone");
-var MineralField = require("./MineralField");
+var Drone = require("./drone");
+var MineralField = require("./mineralField");
 
 var Hatchery = function(){
     return _hatchery.get();
