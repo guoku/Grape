@@ -40,7 +40,7 @@ var Storage = {
         var collection = this.db.collection(collection_name);
         collection.insert(data, {w:1}, function(err, result){
             if(err)
-                console.log(err);
+                console.log("mongo input error: " + err);
         });
     },
     update   : function(collection_name, data){

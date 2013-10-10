@@ -37,9 +37,11 @@ var get_task = function(){
         method   : "GET",
         rejectUnauthorized : false
     };
-    Request(options, function(error, res, body){
-        console.log(error);
-        console.log(res);
+    var req = Request(options, function(error, res, body){
+        if (error){
+            console.log("get task request error: " + error);
+            return;
+        }
         console.log("get_shop:" + body)
 	    var json = eval("(" + body + ")");
         if(!json || json.Sid == 0)
@@ -48,12 +50,15 @@ var get_task = function(){
         var hatchery = new Hatchery(); 
         if(hatchery.tasks.shop.indexOf(json.sid) == -1){
             hatchery.tasks.shop.push(json.sid);
-            console.log(hatchery.tasks.shop);
+            console.log("all shop tasks: " , hatchery.tasks.shop);
         }
+
+        req.end();
     });
 
 };
-setInterval(get_task, 1000 * 10);
+
+setInterval(get_task, 1000  * 55 );
 
 var post_item = function(){
     var options = {
@@ -65,23 +70,24 @@ var post_item = function(){
         method   : "POST",
         rejectUnauthorized : false
     };
-    Storage.read('minerals', {state:"gathered"}, function(data){
+    Storage.readOne('minerals', {state:"gathered"}, function(data){
         if (data == [])
             return;
-
-        for(var i in data){
-            options.form = {
-                sid      : data[i].shop_id,
-                item_ids : data[i].items_list.join(","),
-            };
-            Request(options, function(error, res, body){
-                console.log(error);
-                if(!error){
-                    Storage.update('minerals', data[i]);
-                }
-            });
-        }
+        
+        options.form = {
+            sid      : data[0].shop_id,
+            item_ids : data[0].items_list.join(","),
+        };
+        var req = Request(options, function(error, res, body){
+            if(!error){
+                Storage.update('minerals', data[0]);
+            }
+            else {
+                console.log("post item request error: " + error);
+            }
+            req.end();
+        });
     });
 
 };
-setInterval(post_item, 1000 * 10);
+setInterval(post_item, 1000 * 30);
