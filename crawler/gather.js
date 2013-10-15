@@ -24,41 +24,53 @@ var Gather = {
         }, options);
 
         var gather = this;
-        var req = Http.request(options, function(res){
-            console.log(options['hostname'] + options['path'] + ' : ' + res.statusCode);
-            if (res.statusCode == '302'){
-                var redirect_url = res.headers.location;
-                req.end();
-                gather.get(parse_f, {url:redirect_url}, callback)
-                return;
-            }
-
-//            timeout = setTimeout(function() {
-//                timeout = null;
-//                req.abort();
-//                console.error(err);
-//            }, 5000);
-            if (options['hostname'].indexOf("taobao") == -1 && options['hostname'].indexOf("tmall") == -1){
-                res.setEncoding('utf8');
-            }
-            var buffers = [];
-            res.on('data', function (chunk) {
-                var b = new Buffer(chunk);
-                buffers.push(b);
-            }).on('end', function(){
-                if (options['hostname'].indexOf("taobao") != -1 || options['hostname'].indexOf("tmall") != -1){
-                    var iconv = new Iconv('GBK', 'UTF-8');
-                    var html = iconv.convert(Buffer.concat(buffers)).toString();
+        try{
+            var req = Http.request(options, function(res){
+                console.log(options['hostname'] + options['path'] + ' : ' + res.statusCode);
+                if (res.statusCode == '302' || res.statusCode == '301'){
+                    var redirect_url = res.headers.location;
+                    req.end();
+                    gather.get(parse_f, {url:redirect_url}, callback)
+                    return;
                 }
-                else
-                    var html = Buffer.concat(buffers).toString();
-                parse_f(html, callback);
-            }).on('error', function(err) {
-//                clearTimeout(response_timeout);
-                console.error(err);
+
+    //            timeout = setTimeout(function() {
+    //                timeout = null;
+    //                req.abort();
+    //                console.error(err);
+    //            }, 5000);
+                if (options['hostname'].indexOf("taobao") == -1 && options['hostname'].indexOf("tmall") == -1){
+                    res.setEncoding('utf8');
+                }
+                var buffers = [];
+                res.on('data', function (chunk) {
+                    var b = new Buffer(chunk);
+                    buffers.push(b);
+                }).on('end', function(){
+                    if (options['hostname'].indexOf("taobao") != -1 || options['hostname'].indexOf("tmall") != -1){
+                        try{
+                            var iconv = new Iconv('GBK', 'UTF-8');
+                            var html = iconv.convert(Buffer.concat(buffers)).toString();
+                        }
+                        catch(e){
+                            console.log(e);
+                            return;
+                        }
+                        
+                    }
+                    else
+                        var html = Buffer.concat(buffers).toString();
+                    parse_f(html, callback);
+                }).on('error', function(err) {
+    //                clearTimeout(response_timeout);
+                    console.error(err);
+                });
             });
-        });
-        req.end();
+            req.end();
+        }
+        catch(e){
+            console.log(e);
+        }
     }
 };
 

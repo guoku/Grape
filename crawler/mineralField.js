@@ -35,6 +35,7 @@ var MineralField = function(options){
                 this.items_num = this.items_list.length + 1;
                 this.state = 'occupied';
                 this.page++;
+                console.log(this.page);
             }
             else{
                 if (this.items_list.length > 0) {

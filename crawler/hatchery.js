@@ -56,6 +56,22 @@ var _hatchery = {
                         });
                     }
                 }, 1000  * 60);
+                setInterval(function(){
+                    if(hatchery.tasks.item.length > 0){
+                        var item_id = hatchery.tasks.item.shift();
+                        var drone = hatchery.create_drone({
+                            hostname : "item.taobao.com",
+                            path     : "/item.htm?id=" + item_id,
+                            type     : "taobao_item_image"
+                        }, function(data){
+                            data.item_id = item_id;
+                            console.log(data);
+
+                            hatchery.kill_drone(drone);
+                        });
+                        drone.work();
+                    }
+                }, 1000  * 1);
             }
         };
     },

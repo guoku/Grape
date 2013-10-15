@@ -9,6 +9,8 @@ var Drone = function(options, callback){
     _drone.get_parser = function(){
         if(this.options.type=="taobao_shop")
             return Parser.parse_taobao_shop;
+        if(this.options.type=="taobao_item_image")
+            return Parser.parse_taobao_item_image;
         return null;
     };
     _drone.work = function(){
