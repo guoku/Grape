@@ -62,7 +62,7 @@ var get_task = function(){
     }
 
 };
-setInterval(get_task, 1000  * 100 );
+//setInterval(get_task, 1000  * 100 );
 
 var lock=false;
 var post_item = function(){
