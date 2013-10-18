@@ -16,6 +16,7 @@ var MineralField = function(options){
         if (this.state == "gathered" || this.state == "error")
             return false;
 
+        console.log(this.page);
         var page_str = this.page > 1? "&pageNum="+this.page : "";
         return {
             hostname : "shop"+this.shop_id+".taobao.com",
@@ -27,6 +28,7 @@ var MineralField = function(options){
         this.items_num = parseInt(data.items_num);
         this.items_list = this.items_list.concat(data.id_list);
         if(data.id_list.length == 0){
+            this.state = 'error';
             return false;
         }
         console.log(this.items_num + " || " + this.items_list.length);

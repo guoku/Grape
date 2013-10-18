@@ -15,7 +15,7 @@ var Parser = {
         });
 
         var items_num = $.trim($(html).find(".search-result span").text());
-        if (!parseInt(items_num) && $(html).find("a:contains('下一页').disable").get(0)==undefined ) {
+        if (!parseInt(items_num) && $(html).find("a:contains('下一页')").get(0)!=undefined && $(html).find("a:contains('下一页').disable").get(0)==undefined ) {
             var has_more = true;
         }
         else 

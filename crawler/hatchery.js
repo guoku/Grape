@@ -55,7 +55,7 @@ var _hatchery = {
                             shop_id : shop_id
                         });
                     }
-                }, 1000  * 60);
+                }, 1000  * 30);
                 setInterval(function(){
                     if(hatchery.tasks.item.length > 0){
                         var item_id = hatchery.tasks.item.shift();

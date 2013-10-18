@@ -29,17 +29,25 @@ var Gather = {
             console.log(options['hostname'] + options['path'] + ' : ' + res.statusCode);
             if (res.statusCode == '302' || res.statusCode == '301'){
                 var redirect_url = res.headers.location;
+                var new_options = Url.parse(redirect_url);
+                if (!new_options['hostname']){
+                    new_options['hostname'] = options['hostname'];
+                }
                 req.end();
-                gather.get(parse_f, {url:redirect_url}, callback)
+                gather.get(parse_f, new_options, callback)
                 return;
             }
 
+            if (res.statusCode != '200'){
+                req.end();
+                return;
+            }
 //            timeout = setTimeout(function() {
 //                timeout = null;
 //                req.abort();
 //                console.error(err);
 //            }, 5000);
-            if (options['hostname'].indexOf("taobao") == -1 && options['hostname'].indexOf("tmall") == -1){
+            if (options['hostname'] && options['hostname'].indexOf("taobao") == -1 && options['hostname'].indexOf("tmall") == -1){
                 res.setEncoding('utf8');
             }
             var buffers = [];
