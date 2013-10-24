@@ -14,11 +14,16 @@ var Drone = function(options, callback){
         return null;
     };
     _drone.work = function(){
-        var parser = this.get_parser();
-        if(!parser){
-            return false;
+        if(this.options.type == "image"){
+            Gather.get_image(this.options, callback);
         }
-        Gather.get(parser, this.options, callback);
+        else{
+            var parser = this.get_parser();
+            if(!parser){
+                return false;
+            }
+            Gather.get(parser, this.options, callback);
+        }
     };
 
     return _drone;

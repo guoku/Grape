@@ -20,13 +20,10 @@ var post_item = function(){
             return;
         
         lock = true;
-        console.log(data[0].shop_id);
-        console.log(data[0].items_list.length);
 
         var size = 500;
         var part_post = function(k){
             var part = data[0].items_list.slice(k*size, (k+1)*size);
-            console.log(part.length);
             options.form = {
                 sid      : data[0].shop_id,
                 item_ids : part.join(","),
@@ -35,7 +32,7 @@ var post_item = function(){
             var req = Request(options, function(error, res, body){
                 console.log("post sent...");
                 if(!error && !((k+1)*size<data[0].items_list.length)){
-                    Storage.update('minerals', data[0]);
+                    Storage.update('minerals', data[0], {state:'posted'});
                     lock = false;
                 }
                 else if(error) {

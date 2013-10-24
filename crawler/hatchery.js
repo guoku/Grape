@@ -1,5 +1,6 @@
 var Drone = require("./drone");
 var MineralField = require("./mineralField");
+var Storage = require("./storage");
 
 var Hatchery = function(){
     return _hatchery.get();
@@ -56,6 +57,7 @@ var _hatchery = {
                         });
                     }
                 }, 1000  * 30);
+
                 setInterval(function(){
                     if(hatchery.tasks.item.length > 0){
                         var item_id = hatchery.tasks.item.shift();
@@ -65,13 +67,27 @@ var _hatchery = {
                             type     : "taobao_item_image"
                         }, function(data){
                             data.item_id = item_id;
-                            console.log(data);
-
                             hatchery.kill_drone(drone);
+
+                            var save = function(){
+                                var image_url = data.image_url_list.shift();
+                                if(!image_url) return;
+
+                                var image_drone = hatchery.create_drone({
+                                    url      : image_url,
+                                    type     : "image"
+                                },function(content, filename){
+                                    Storage.save_image(content, filename, item_id, function(){
+                                        save();
+                                    });
+                                });
+                                image_drone.work();
+                            }
+                            save();
                         });
                         drone.work();
                     }
-                }, 1000  * 1);
+                }, 1000  * 10);
             }
         };
     },

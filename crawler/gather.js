@@ -42,11 +42,6 @@ var Gather = {
                 req.end();
                 return;
             }
-//            timeout = setTimeout(function() {
-//                timeout = null;
-//                req.abort();
-//                console.error(err);
-//            }, 5000);
             if (options['hostname'] && options['hostname'].indexOf("taobao") == -1 && options['hostname'].indexOf("tmall") == -1){
                 res.setEncoding('utf8');
             }
@@ -73,7 +68,47 @@ var Gather = {
             })
         });
         req.on('error', function(err) {
-//                clearTimeout(response_timeout);
+            console.error(err);
+        });
+        req.end();
+    },
+    get_image : function(options, callback){
+        if (options.url){
+            var url_info = Url.parse(options.url);
+            options.hostname = url_info.hostname;
+            options.path = url_info.path?url_info.path:"";
+            options.port = url_info.port?url_info.port:"";
+        }
+        
+        var index = Math.floor(Math.random()*1000 % Config.ua.length);
+        var ua = Config.ua[index];
+
+        var options = $.extend({
+            headers: {
+                "User-Agent" : ua
+            },
+            method : "GET"
+        }, options);
+
+        var gather = this;
+        console.log(options.url);
+        var req = Http.request(options, function(res){
+            if (res.statusCode != '200'){
+                req.end();
+                return;
+            }
+            var buffers = [];
+            res.on('data', function (chunk) {
+                var b = new Buffer(chunk);
+                buffers.push(b);
+            }).on('end', function(){
+                var content = Buffer.concat(buffers);
+                var str_arr = options.path.split("/");
+                var filename = str_arr[str_arr.length-1];
+                callback(content, filename);
+            })
+        });
+        req.on('error', function(err) {
             console.error(err);
         });
         req.end();

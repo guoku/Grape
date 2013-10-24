@@ -10,3 +10,5 @@ npm install mongoskin
 npm install express 
 npm install request 
 npm install iconv
+npm install GridFS
+npm install MD5
